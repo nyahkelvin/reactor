@@ -11,6 +11,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.Json;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -22,6 +24,8 @@ import java.util.Map;
  * @author kelvinashu
  */
 public class ServerVerticle extends AbstractVerticle {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerVerticle.class);
 
     private static final String JSON_CONTENT_TYPE = "application/json";
     private static final String CONTENT_TYPE_TEXT = "content-type";
@@ -53,10 +57,10 @@ public class ServerVerticle extends AbstractVerticle {
 
         server.requestHandler(router::accept).listen(8080, ar -> {
             if (ar.succeeded()) {
-                System.out.println("Server started");
+                LOGGER.info("Server started");
                 future.complete();
             } else {
-                System.out.println("Server failed to start");
+                LOGGER.error("Server failed to start");
                 future.fail(ar.cause());
             }
         });
