@@ -6,6 +6,7 @@
 package io.boleka.reactor.domain;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -28,6 +29,8 @@ public class Loan {
     private Integer payment_period;
     private Integer loan_progress;
     private Date created_date;
+    
+    private List<Bid> bids;
 
     public Integer getId() {
         return id;
@@ -148,6 +151,16 @@ public class Loan {
     public void setCreated_date(Date created_date) {
         this.created_date = created_date;
     }
+
+    public List<Bid> getBids() {
+        return bids;
+    }
+
+    public void setBids(List<Bid> bids) {
+        this.bids = bids;
+    }
+    
+    
 
     @Override
     public String toString() {

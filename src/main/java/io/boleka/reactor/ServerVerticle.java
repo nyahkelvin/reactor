@@ -5,6 +5,8 @@
  */
 package io.boleka.reactor;
 
+import io.boleka.reactor.domain.Bid;
+import io.boleka.reactor.domain.Loan;
 import io.boleka.reactor.domain.Person;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
@@ -16,7 +18,12 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.CorsHandler;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,9 +36,16 @@ public class ServerVerticle extends AbstractVerticle {
 
     private static final String JSON_CONTENT_TYPE = "application/json";
     private static final String CONTENT_TYPE_TEXT = "content-type";
+    private static final String LOAN_CONTENT = "Labore eum dicta. "
+            + "Illo aut voluptates veniam hic cumque dolorum doloremque quis. "
+            + "Reiciendis ut aut facere nostrum voluptatem sed laborum est "
+            + "architecto.";
 
     // Store our product
     private Map<Integer, Person> personMap = new LinkedHashMap<>();
+
+    //Store our loans
+    List<Loan> loans = new ArrayList<>();
 
     public static void main(String[] args) {
         Vertx vertx = Vertx.vertx();
@@ -40,7 +54,7 @@ public class ServerVerticle extends AbstractVerticle {
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
-        initDB();
+        initLoan();
         startHTTPServer();
     }
 
@@ -49,6 +63,8 @@ public class ServerVerticle extends AbstractVerticle {
         HttpServer server = vertx.createHttpServer();
 
         Router router = Router.router(vertx);
+
+        router.route().handler(CorsHandler.create("*"));
 
         router.route().handler(BodyHandler.create());
         router.get("/").handler(this::homeRoute);
@@ -81,6 +97,42 @@ public class ServerVerticle extends AbstractVerticle {
         personMap.put(p2.getId(), p2);
     }
 
+    private void initLoan() {
+        for (int i = 0; i < 3; i++) {
+            List<Bid> bids = new ArrayList<>();
+            Loan loan = new Loan();
+            loan.setId(i);
+            loan.setBorrower_avatar("https://s3.amazonaws.com/uifaces/faces/twitter/waghner/128.jpg");
+            loan.setLoan_amount(i + 6800.00);
+            loan.setBalance(i + 90.3);
+            loan.setTime_left(i + 160);
+            loan.setLoan_type("Payday loan");
+            loan.setDescription(LOAN_CONTENT);
+            loan.setLoan_interest(12.5);
+            loan.setRisk_level("text-success");
+            loan.setRisk_lable("label-success");
+            loan.setRisk_progress("progress-bar-success");
+            loan.setRisk_alert("hgreen");
+            loan.setPayment_period(i + 1);
+            loan.setLoan_progress(i + 20);
+            loan.setCreated_date(new Date());
+
+            for (int k = 0; k < 3; k++) {
+                Bid bid = new Bid();
+                bid.setBidder("@Conrad Haag");
+                bid.setBidder_avatar("https://s3.amazonaws.com/uifaces/faces/twitter/andrewofficer/128.jpg");
+                bid.setBid_date(new Date());
+                bid.setBid_amount(9000.8);
+                bid.setBid_interest(9.5);
+                bid.setBid_rating("fa fa-star-half-o");
+                bids.add(bid);
+            }
+            loan.setBids(bids);
+            loans.add(loan);
+        }
+
+    }
+
     private void getAll(RoutingContext context) {
         context.response()
                 .putHeader(CONTENT_TYPE_TEXT, JSON_CONTENT_TYPE)
@@ -98,7 +150,7 @@ public class ServerVerticle extends AbstractVerticle {
     }
 
     private void homeRoute(RoutingContext context) {
-        context.response().putHeader(CONTENT_TYPE_TEXT, JSON_CONTENT_TYPE).end(Json.encodePrettily(new Person(90, "Kelvin Ashu")));
+        context.response().putHeader(CONTENT_TYPE_TEXT, JSON_CONTENT_TYPE).end(Json.encodePrettily(loans));
     }
 
 }
