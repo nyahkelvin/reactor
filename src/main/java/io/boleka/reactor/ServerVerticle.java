@@ -66,11 +66,6 @@ public class ServerVerticle extends AbstractVerticle {
         Router router = Router.router(vertx);
 
         router.route().handler(CorsHandler.create("*")
-                .allowedMethod(HttpMethod.GET)
-                .allowedMethod(HttpMethod.POST)
-                .allowedMethod(HttpMethod.PUT)
-                .allowedMethod(HttpMethod.DELETE)
-                .allowedMethod(HttpMethod.OPTIONS)
                 .allowedHeader("Content-Type"));
         router.route().handler(BodyHandler.create());
 
