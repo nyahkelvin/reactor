@@ -11,6 +11,7 @@ import io.boleka.reactor.domain.Person;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.Json;
 import io.vertx.core.logging.Logger;
@@ -64,12 +65,19 @@ public class ServerVerticle extends AbstractVerticle {
 
         Router router = Router.router(vertx);
 
-        router.route().handler(CorsHandler.create("*"));
-
+        router.route().handler(CorsHandler.create("*")
+                .allowedMethod(HttpMethod.GET)
+                .allowedMethod(HttpMethod.POST)
+                .allowedMethod(HttpMethod.PUT)
+                .allowedMethod(HttpMethod.DELETE)
+                .allowedMethod(HttpMethod.OPTIONS)
+                .allowedHeader("Content-Type"));
         router.route().handler(BodyHandler.create());
+
         router.get("/").handler(this::homeRoute);
         router.get("/api/people").handler(this::getAll);
         router.post("/api/person").handler(this::addPerson);
+        router.post("/api/bid").handler(this::addBid);
 
         server.requestHandler(router::accept).listen(8080, ar -> {
             if (ar.succeeded()) {
@@ -147,6 +155,17 @@ public class ServerVerticle extends AbstractVerticle {
         context.response()
                 .setStatusCode(201)
                 .putHeader(CONTENT_TYPE_TEXT, JSON_CONTENT_TYPE).end(Json.encodePrettily(person));
+    }
+
+    private void addBid(RoutingContext context) {
+        System.out.println("bid as string " + context.getBodyAsString());
+        final Bid bid = Json.decodeValue(context.getBodyAsString(), Bid.class);
+        LOGGER.info("Bid from service: " + bid);
+        //personMap.put(person.getId(), person);
+        context.response()
+                .setStatusCode(201)
+                .putHeader(CONTENT_TYPE_TEXT, JSON_CONTENT_TYPE)
+                .end(Json.encodePrettily(bid));
     }
 
     private void homeRoute(RoutingContext context) {
